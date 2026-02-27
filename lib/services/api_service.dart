@@ -14,9 +14,7 @@ class ApiService {
       'resource': resource,
     });
 
-    final response = await http.get(uri, headers: {
-      'Authorization': 'Bearer ${Env.apiToken}',
-    });
+    final response = await http.get(uri);
 
     if (response.statusCode != 200) {
       throw Exception('Failed to fetch images: ${response.statusCode}');
@@ -47,7 +45,7 @@ class ApiService {
     const mimeType = 'image/png';
 
     // STEP 1 — Get presigned URL
-    final uri = Uri.parse(Env.presignEndpoint).replace(queryParameters: {
+    final uri = Uri.parse(Env.uploadEndpoint).replace(queryParameters: {
       'id': userId,
       'file_key': filename,
       'resource': resource,
@@ -55,7 +53,6 @@ class ApiService {
     });
 
     final presignResponse = await http.get(uri, headers: {
-      'Authorization': 'Bearer ${Env.apiToken}',
       'Content-Type': mimeType,
     });
 
