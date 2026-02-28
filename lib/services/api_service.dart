@@ -33,7 +33,6 @@ class ApiService {
       ).replace(queryParameters: {'id': userId, 'resource': resource});
 
       final response = await httpClient.get(uri).timeout(_timeout);
-      ;
 
       if (response.statusCode != 200) {
         throw _httpError('Failed to fetch images', response);
@@ -95,7 +94,6 @@ class ApiService {
       final presignResponse = await httpClient
           .get(uri, headers: {'Content-Type': mimeType})
           .timeout(_timeout);
-      ;
 
       if (presignResponse.statusCode != 200) {
         throw _httpError('Failed to get presigned URL', presignResponse);
