@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mini_gallery_app/services/api_service.dart';
-import 'package:mini_gallery_app/widgets/image_grid.dart';
+import 'package:mini_gallery_app/features/gallery/presentation/widgets/image_grid.dart';
+import 'package:mini_gallery_app/core/config/env_config.dart';
+import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
 
 import '../models/image_item.dart';
-import '../widgets/button.dart';
+import 'widgets/button.dart';
 
-final String userId = "6";
-final String resource = "users";
+final String userId = Env.userId;
+final String resource = Env.resource;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,6 +21,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ImagePicker _picker = ImagePicker();
+  late final http.Client _client;
 
   List<ImageItem> _items = [];
   bool _isUploading = false;
@@ -26,13 +30,24 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _client = http.Client();
     _fetchImages();
+  }
+
+  @override
+  void dispose() {
+    _client.close();
+    super.dispose();
   }
 
   Future<void> _fetchImages() async {
     setState(() => _status = "Loading...");
     try {
-      final images = await ApiService.fetchImages(userId: userId, resource: resource);
+      final images = await ApiService.fetchImages(
+        userId: userId,
+        resource: resource,
+        client: _client,
+      );
       setState(() => _items = images);
     } catch (e) {
       setState(() => _status = "Error fetching images: $e");
@@ -46,10 +61,26 @@ class _HomePageState extends State<HomePage> {
     // Read the picked image bytes
     final bytes = await picked.readAsBytes();
 
+    // MIME detection:
+    // - uses file extension if available
+    // - uses header bytes as a fallback/validation
+    final mimeType = lookupMimeType(
+      picked.name,
+      headerBytes: bytes.length >= 32 ? bytes.sublist(0, 32) : bytes,
+    ) ??
+        'application/octet-stream';
+
     setState(() => _isUploading = true);
 
     try {
-      await ApiService.uploadFile(userId: userId, filename: picked.name, resource: resource, bytes: bytes);
+      await ApiService.uploadFile(
+        userId: userId,
+        filename: picked.name,
+        resource: resource,
+        bytes: bytes,
+        mimeType: mimeType,
+        client: _client,
+      );
       await _fetchImages(); // Refresh after upload
       setState(() => _status = "Upload successful");
     } catch (e) {
@@ -83,11 +114,11 @@ class _HomePageState extends State<HomePage> {
               text: "Upload",
               onPressed: _isUploading ? null : _pickAndUploadImage,
             ),
-
             const SizedBox(height: 12),
             Row(
               children: [
-                Text("Number of uploaded images: ${_items.length}",
+                Text(
+                  "Number of uploaded images: ${_items.length}",
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(width: 16),
@@ -95,16 +126,15 @@ class _HomePageState extends State<HomePage> {
                   text: "Refresh",
                   onPressed: _isUploading ? null : _fetchImages,
                 ),
-              ]
+              ],
             ),
-
             const SizedBox(height: 12),
             Expanded(
               child: _isUploading
                   ? const Center(child: CircularProgressIndicator())
                   : _items.isEmpty
-                      ? const Center(child: Text("No images uploaded yet"))
-                      : ImageGrid(items: _items),
+                  ? const Center(child: Text("No images uploaded yet"))
+                  : ImageGrid(items: _items),
             ),
           ],
         ),

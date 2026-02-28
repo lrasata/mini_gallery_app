@@ -10,10 +10,14 @@ class ImageItem {
   });
 
   factory ImageItem.fromJson(Map<String, dynamic> json) {
+    final filename = json['filename'] as String;
+    final timestamp = DateTime.parse(json['timestamp'] as String);
+    final imageUrl = json['imageUrl'] as String;
+
     return ImageItem(
-      filename: json['filename'],
-      timestamp: DateTime.parse(json['timestamp']),
-      imageUrl: json['imageUrl'],
+      filename: filename,
+      timestamp: timestamp,
+      imageUrl: imageUrl,
     );
   }
 }

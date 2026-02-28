@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/image_item.dart';
+import '../../models/image_item.dart';
 
 class ImageGrid extends StatelessWidget {
   final List<ImageItem> items;
@@ -26,11 +26,28 @@ class ImageGrid extends StatelessWidget {
           itemBuilder: (context, index) {
             final item = items[index];
             return Card(
+              clipBehavior: Clip.antiAlias,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Image.network(item.imageUrl, width: double.infinity, fit: BoxFit.cover),
+                    child: Image.network(
+                      item.imageUrl,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(12.0),
+                            child: Text('Failed to load image'),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -39,8 +56,10 @@ class ImageGrid extends StatelessWidget {
                       children: [
                         Text(item.filename, style: const TextStyle(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text("Uploaded at ${item.timestamp.toLocal()}",
-                            style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        Text(
+                          "Uploaded at ${item.timestamp.toLocal()}",
+                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
                       ],
                     ),
                   ),

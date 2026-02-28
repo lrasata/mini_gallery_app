@@ -8,21 +8,25 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        side: const BorderSide(
-          color: Colors.blue,
+        side: BorderSide(
+          color: colorScheme.primary,
           width: 2,
         ), // border color & width
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        foregroundColor: Colors.blue,
+        foregroundColor: colorScheme.primary,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        minimumSize: const Size(120, 44),
       ),
       child: Text(
         text,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
       ),
     );
   }
