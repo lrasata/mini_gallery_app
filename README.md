@@ -4,16 +4,12 @@ A small Flutter app that lets you pick images from your device and upload them u
 
 > 🚧 **Local testing only (for now):** This project is currently intended to run only in a local/dev environment. It is not production-ready yet.
 
----
-
 ## Features
 
 - Pick an image from a local device
 - Fetch and display uploaded images
 - Responsive grid layout (adapts to screen size)
 - Basic loading state during upload and refresh
-
----
 
 ## Requirements
 
@@ -23,20 +19,22 @@ A small Flutter app that lets you pick images from your device and upload them u
   - **Presign endpoint** returning an `upload_url` for direct upload
 - A local `.env` file with required configuration values
 
----
-
 ## Getting Started (Local / Dev)
 
 ### 1) Install dependencies
+
 ```bash
 flutter pub get
 ```
+
 ### 2) Create a local `.env`
 
 Create a `.env` file in the project root.
 
 Example (use placeholders; replace with your local/dev values):
+
 ```env
+
 FETCH_FILES_ENDPOINT=<LOCAL_FETCH_ENDPOINT_URL>
 UPLOAD_ENDPOINT=<LOCAL_UPLOAD_ENDPOINT_URL>
 
@@ -44,15 +42,17 @@ UPLOAD_ENDPOINT=<LOCAL_UPLOAD_ENDPOINT_URL>
 USER_ID=<LOCAL_TEST_USER_ID>
 RESOURCE=<LOCAL_TEST_RESOURCE>
 ```
+
 Notes:
+
 - Keep `.env` values local.
 - Do not commit real environment values.
 
 ### 3) Run the app
+
 ```bash
 flutter run
 ```
----
 
 ## How the Upload Works (High Level)
 
@@ -61,13 +61,11 @@ flutter run
 3. App uploads the image bytes directly to that URL in the s3 bucket.
 4. App refreshes the image list also by getting a presigned get URL and updates the grid.
 
----
-
 ## Project Structure
 
 The project is organized to stay clean even with a small codebase:
-```
-text
+
+```text
 lib/
     app/                    App bootstrap
     core/                   Cross-cutting concerns (config, helpers, errors)
@@ -76,7 +74,6 @@ lib/
     services/               Networking services (API integration)
     main.dart               Entry point (.env load, runApp)
 ```
----
 
 ## Limitations (Why It’s Local-Only Right Now)
 
@@ -89,10 +86,3 @@ This is intentionally minimal. For production readiness you would typically add:
 - Pagination/infinite scrolling for large galleries
 - CI checks and more automated tests
 - Environment flavors (dev/staging/prod) and build pipelines
-
----
-
-## License
-
-Add a license if you plan to distribute publicly. For now, this project is intended for local testing/development use.
-
