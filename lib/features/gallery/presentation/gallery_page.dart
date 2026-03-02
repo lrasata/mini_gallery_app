@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             Text(
-              "Welcome User $userId! Upload your images below.",
+              "Welcome $userId! Upload your images below.",
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 12),

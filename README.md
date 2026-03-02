@@ -16,7 +16,7 @@ A small Flutter app that lets you pick images from your device and upload them u
 - Flutter SDK (use the version compatible with `pubspec.yaml`)
 - A backend service (local/dev) that provides:
   - **Fetch endpoint** returning a JSON object with an `images` list
-  - **Presign endpoint** returning an `upload_url` for direct upload
+  - **Upload endpoint** returning an `upload_url` for direct upload
 - A local `.env` file with required configuration values
 
 ## Getting Started (Local / Dev)
@@ -54,12 +54,35 @@ Notes:
 flutter run
 ```
 
-## How the Upload Works (High Level)
+## How Upload & Fetch Works (High Level)
 
-1. App requests a presigned upload URL from the backend (using filename/resource/mime type).
-2. Backend returns `upload_url`
-3. App uploads the image bytes directly to that URL in the s3 bucket.
-4. App refreshes the image list also by getting a presigned get URL and updates the grid.
+### Upload Flow
+
+1. **App requests a presigned upload URL from the backend**  
+   The app sends the `userId`, `filename`, `resource`, and `mimeType` to the backend.
+
+2. **Backend returns a time-limited presigned URL**  
+   The backend generates a secure, temporary upload URL for Amazon S3 and sends it back to the app.
+
+3. **App uploads the image directly to S3**  
+   The app sends the image bytes in an HTTP `PUT` request to the presigned URL.  
+   The backend is not involved in transferring the file itself.
+
+4. **App refreshes the image list**  
+   After a successful upload, the app fetches the updated list of images.
+
+### Fetch Flow
+
+1. **App requests the image list from the backend**  
+   The request includes `userId` and `resource`.
+
+2. **Backend returns image metadata with presigned GET URLs**  
+   For each stored image, the backend generates a temporary, secure download URL.
+
+3. **App displays images using those URLs**  
+   The app maps the response to UI models, sorts by timestamp (newest first), and updates the grid.
+
+This approach keeps file transfers secure, scalable, and efficient by allowing the client to communicate directly with S3 while the backend controls access.
 
 ## Project Structure
 
@@ -80,9 +103,8 @@ lib/
 This is intentionally minimal. For production readiness you would typically add:
 
 - Authentication/authorization
-- Secure handling of configuration/secrets (no `.env` shipping strategies)
 - Better error mapping and user-friendly UI messaging
-- Image caching and improved placeholders
+- Caching
 - Pagination/infinite scrolling for large galleries
 - CI checks and more automated tests
 - Environment flavors (dev/staging/prod) and build pipelines
